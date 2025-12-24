@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISEF Project Database</title>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            background: #1a73e8;
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .search-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        #searchInput {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #searchInput:focus {
+            border-color: #1a73e8;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+        }
+
+        .stats {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .results {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: box-shadow 0.2s;
+        }
+
+        .project-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .project-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a73e8;
+            margin: 0 0 10px 0;
+            cursor: pointer;
+        }
+
+        .project-title:hover {
+            text-decoration: underline;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .meta-item {
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 4px;
+            color: #555;
+        }
+
+        .meta-item.year {
+            background: #e8f0fe;
+            color: #1a73e8;
+        }
+
+        .meta-item.category {
+            background: #fce8e6;
+            color: #d93025;
+        }
+
+        .abstract {
+            color: #333;
+            line-height: 1.6;
+            font-size: 14px;
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .abstract.expanded {
+            max-height: none;
+        }
+
+        .abstract::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, white);
+        }
+
+        .abstract.expanded::after {
+            display: none;
+        }
+
+        .expand-btn {
+            background: none;
+            border: none;
+            color: #1a73e8;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 5px 0;
+        }
+
+        .awards {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .award-item {
+            background: #fef7e0;
+            color: #b36200;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            background: white;
+            border-radius: 8px;
+        }
+
+        mark {
+            background: #fff3cd;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination button.active {
+            background: #1a73e8;
+            color: white;
+            border-color: #1a73e8;
+        }
+
+        .about-section {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .about-section h2 {
+            color: #1a73e8;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .about-section h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+
+        .about-section p {
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        .about-section ul {
+            color: #555;
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+
+        .about-section li {
+            margin-bottom: 8px;
+        }
+
+        .about-section a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+
+        .about-section a:hover {
+            text-decoration: underline;
+        }
+
+        .creator-credit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .creator-credit a {
+            color: white;
+            font-weight: 600;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #1a73e8;
+        }
+
+        .feature-card h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .feature-card p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        /* Library features */
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .inspire-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .inspire-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .bookmarks-btn {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .bookmarks-btn:hover {
+            background: #fde68a;
+        }
+
+        .bookmark-icon {
+            cursor: pointer;
+            font-size: 20px;
+            transition: transform 0.2s;
+        }
+
+        .bookmark-icon:hover {
+            transform: scale(1.2);
+        }
+
+        .bookmark-icon.saved {
+            color: #f59e0b;
+        }
+
+        .project-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .keyword-tag {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.visible {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 25px;
+        }
+
+        .modal h2 {
+            margin: 0 0 20px 0;
+            color: #1a73e8;
+        }
+
+        .modal-close {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .saved-project {
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .saved-project-title {
+            font-weight: 600;
+            color: #1a73e8;
+            margin-bottom: 5px;
+        }
+
+        .saved-project-meta {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .remove-bookmark {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .highlight-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            border: none;
+            background: #f3f4f6;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .tab-btn.active {
+            background: #1a73e8;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ISEF Project Database</h1>
+        <p class="subtitle">Search through Intel ISEF project abstracts with advanced fuzzy matching</p>
+        <a href="explore.html" style="display:inline-block;margin-top:15px;padding:10px 20px;background:rgba(255,255,255,0.2);color:white;text-decoration:none;border-radius:6px;font-weight:500;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">Explore by Category (Interactive Graph)</a>
+    </header>
+
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search projects by title, abstract, keywords..." autofocus>
+        </div>
+        <div class="filters">
+            <div class="filter-group">
+                <label>Year:</label>
+                <select id="yearFilter">
+                    <option value="">All Years</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Category:</label>
+                <select id="categoryFilter">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Awards:</label>
+                <select id="awardFilter">
+                    <option value="">All</option>
+                    <option value="has">Has Awards</option>
+                    <option value="none">No Awards</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Country:</label>
+                <select id="countryFilter">
+                    <option value="">All Countries</option>
+                </select>
+            </div>
+        </div>
+        <div class="stats" id="stats"></div>
+        <div class="action-bar">
+            <button class="action-btn inspire-btn" onclick="inspireMe()">✨ Inspire Me</button>
+            <button class="action-btn bookmarks-btn" onclick="showBookmarks()">📚 My Library (<span id="bookmarkCount">0</span>)</button>
+        </div>
+    </div>
+
+    <div class="results" id="results">
+        <div class="loading">Loading projects database...</div>
+    </div>
+
+    <!-- Bookmarks Modal -->
+    <div class="modal-overlay" id="bookmarksModal">
+        <div class="modal">
+            <button class="modal-close" onclick="hideBookmarks()">&times;</button>
+            <h2>📚 My Library</h2>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showTab('all')">All Saved</button>
+                <button class="tab-btn" onclick="showTab('awarded')">Award Winners</button>
+            </div>
+            <div id="bookmarksList"></div>
+        </div>
+    </div>
+
+    <div class="pagination" id="pagination"></div>
+
+    <div class="about-section">
+        <div class="creator-credit">
+            <p style="margin:0;font-size:18px;">Tool created by <a href="https://www.linkedin.com/in/aranyo/" target="_blank">Aranyo Ray</a></p>
+        </div>
+
+        <h2>About This Tool</h2>
+        <p>
+            This database contains <strong>16,000+ ISEF (International Science and Engineering Fair) project abstracts</strong>
+            from 2014 to 2024. It's designed to help students, educators, and researchers discover past projects,
+            find inspiration, and understand trends in student research.
+        </p>
+
+        <h3>How to Use the Search</h3>
+        <p>
+            The search uses <strong>fuzzy matching</strong> powered by Fuse.js, which means you don't need to type exact words.
+            It handles typos, partial matches, and related terms automatically. Just type what you're looking for and
+            the most relevant projects will bubble up to the top.
+        </p>
+        <ul>
+            <li><strong>Natural search:</strong> Type like you'd ask a question - "water purification bacteria" works great</li>
+            <li><strong>Misspellings are okay:</strong> "nueral network" will still find neural network projects</li>
+            <li><strong>Filters:</strong> Narrow down by year, category, or whether the project won awards</li>
+        </ul>
+
+        <h3>Interactive Graph Explorer</h3>
+        <p>
+            Click the "Explore by Category" button to visualize projects as an interactive graph. Select a category
+            to see projects clustered by research themes. Large clusters (50+ projects) can be drilled down further
+            to discover sub-themes automatically extracted from the abstracts.
+        </p>
+        <ul>
+            <li><strong>Gold bubbles:</strong> Projects that won awards</li>
+            <li><strong>Linked bubbles:</strong> Projects with similar methods, techniques, or subject matter</li>
+            <li><strong>Click to drill down:</strong> Large clusters break into smaller sub-themes</li>
+        </ul>
+
+        <h3>How Projects Are Categorized</h3>
+        <p>
+            Each project is assigned a <strong>primary category based on its booth ID</strong> (like EBED for Embedded Systems,
+            ENEV for Environmental Engineering). This ensures accurate categorization regardless of how the original
+            data was labeled.
+        </p>
+
+        <h3>Cross-Listing & NLP Analysis</h3>
+        <p>
+            Here's where it gets interesting: <strong>91% of projects appear in multiple categories</strong>. We use
+            natural language processing to analyze each title and abstract, looking for keywords that indicate
+            relevance to other fields.
+        </p>
+        <p>
+            For example, a project titled "Arduino-Based Soil Moisture Monitor for Precision Agriculture" would appear under:
+        </p>
+        <ul>
+            <li><strong>Embedded Systems</strong> (primary, based on booth ID)</li>
+            <li><strong>Plant Sciences</strong> (mentions soil, agriculture)</li>
+            <li><strong>Environmental Engineering</strong> (precision monitoring)</li>
+        </ul>
+        <p>
+            This cross-listing helps you discover interdisciplinary projects that traditional single-category systems would hide.
+            The average project appears in 4-5 categories, making it easier to find relevant work from unexpected angles.
+        </p>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>🔍 Smart Search</h4>
+                <p>Fuzzy matching handles typos and finds semantically related projects even with imperfect queries.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📊 Visual Explorer</h4>
+                <p>Force-directed graph visualization with automatic clustering by research themes and sub-themes.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🏷️ Multi-Category</h4>
+                <p>NLP-powered cross-listing means projects appear wherever they're relevant, not just one category.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🏆 Award Tracking</h4>
+                <p>Filter by awards or spot award-winning projects instantly in the visual explorer (gold bubbles).</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allProjects = [];
+        let filteredProjects = [];
+        let fuse;
+        let currentPage = 1;
+        const perPage = 20;
+
+        // Bookmarks system
+        let bookmarks = JSON.parse(localStorage.getItem('isefBookmarks') || '[]');
+
+        function updateBookmarkCount() {
+            document.getElementById('bookmarkCount').textContent = bookmarks.length;
+        }
+
+        function isBookmarked(projectId) {
+            return bookmarks.some(b => b.id === projectId);
+        }
+
+        function toggleBookmark(projectId) {
+            const project = allProjects.find(p => p.id === projectId);
+            if (!project) return;
+
+            if (isBookmarked(projectId)) {
+                bookmarks = bookmarks.filter(b => b.id !== projectId);
+            } else {
+                bookmarks.push({
+                    id: project.id,
+                    title: project.title,
+                    year: project.year,
+                    category: project.category,
+                    awards: project.awards,
+                    savedAt: new Date().toISOString()
+                });
+            }
+
+            localStorage.setItem('isefBookmarks', JSON.stringify(bookmarks));
+            updateBookmarkCount();
+            updateResults(); // Refresh to update icons
+        }
+
+        function showBookmarks() {
+            document.getElementById('bookmarksModal').classList.add('visible');
+            renderBookmarksList('all');
+        }
+
+        function hideBookmarks() {
+            document.getElementById('bookmarksModal').classList.remove('visible');
+        }
+
+        function showTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderBookmarksList(tab);
+        }
+
+        function renderBookmarksList(filter) {
+            let items = bookmarks;
+            if (filter === 'awarded') {
+                items = bookmarks.filter(b => b.awards && b.awards.length > 0);
+            }
+
+            if (items.length === 0) {
+                document.getElementById('bookmarksList').innerHTML =
+                    '<div class="empty-state">No saved projects yet. Click the bookmark icon on any project to save it!</div>';
+                return;
+            }
+
+            document.getElementById('bookmarksList').innerHTML = items.map(b => `
+                <div class="saved-project">
+                    <div class="saved-project-title" onclick="window.open('https://abstracts.societyforscience.org/Home/FullAbstract?projectId=${b.id}', '_blank')" style="cursor:pointer">
+                        ${b.title}
+                    </div>
+                    <div class="saved-project-meta">
+                        ${b.year} · ${b.category}
+                        ${b.awards && b.awards.length ? ' · 🏆 Award Winner' : ''}
+                    </div>
+                    <button class="remove-bookmark" onclick="removeBookmark(${b.id})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function removeBookmark(projectId) {
+            bookmarks = bookmarks.filter(b => b.id !== projectId);
+            localStorage.setItem('isefBookmarks', JSON.stringify(bookmarks));
+            updateBookmarkCount();
+            renderBookmarksList('all');
+        }
+
+        // Inspire Me - Random discovery
+        function inspireMe() {
+            // Get high-quality projects (awarded or recent)
+            const awarded = allProjects.filter(p => p.awards && p.awards.trim());
+            const pool = awarded.length > 50 ? awarded : allProjects;
+
+            // Pick 5 random projects
+            const shuffled = pool.sort(() => 0.5 - Math.random());
+            filteredProjects = shuffled.slice(0, 5);
+            currentPage = 1;
+
+            document.getElementById('searchInput').value = '';
+            document.getElementById('yearFilter').value = '';
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('awardFilter').value = '';
+            document.getElementById('countryFilter').value = '';
+
+            document.getElementById('stats').innerHTML =
+                '<strong>✨ Here are 5 inspiring projects!</strong> Click again for more.';
+            updateResults();
+        }
+
+        // Extract keywords from project
+        function extractKeywords(project) {
+            const text = ((project.title || '') + ' ' + (project.abstract || '')).toLowerCase();
+            const stopwords = new Set(['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'has', 'was', 'one', 'our', 'this', 'that', 'with', 'from', 'have', 'were', 'been', 'which', 'their', 'there', 'would', 'could', 'these', 'those', 'into', 'than', 'then', 'also', 'more', 'some', 'such', 'only', 'other', 'when', 'what', 'where', 'while', 'about', 'after', 'before', 'between', 'through', 'during', 'each', 'both', 'using', 'used', 'study', 'research', 'project', 'result', 'method', 'effect', 'data', 'based', 'different', 'found', 'show', 'order', 'well', 'however']);
+
+            const words = text.match(/\b[a-z]{4,}\b/g) || [];
+            const counts = {};
+            words.forEach(w => {
+                if (!stopwords.has(w)) {
+                    counts[w] = (counts[w] || 0) + 1;
+                }
+            });
+
+            return Object.entries(counts)
+                .filter(([w, c]) => c >= 2)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([w]) => w.charAt(0).toUpperCase() + w.slice(1));
+        }
+
+        // Fuse.js options for fuzzy search
+        const fuseOptions = {
+            keys: [
+                { name: 'title', weight: 0.4 },
+                { name: 'abstract', weight: 0.3 },
+                { name: 'category', weight: 0.2 },
+                { name: 'awards', weight: 0.1 }
+            ],
+            threshold: 0.4,
+            distance: 1000,
+            includeScore: true,
+            includeMatches: true,
+            minMatchCharLength: 2,
+            ignoreLocation: true,
+            useExtendedSearch: true
+        };
+
+        // Load projects data
+        async function loadProjects() {
+            try {
+                const response = await fetch('data/projects.json');
+                allProjects = await response.json();
+
+                // Initialize Fuse search
+                fuse = new Fuse(allProjects, fuseOptions);
+
+                // Populate filters
+                populateFilters();
+
+                // Initial display
+                filteredProjects = allProjects;
+                updateResults();
+                updateBookmarkCount();
+
+            } catch (error) {
+                document.getElementById('results').innerHTML =
+                    '<div class="no-results">Error loading database. Make sure to run the scraper first.</div>';
+                console.error('Error loading projects:', error);
+            }
+        }
+
+        function populateFilters() {
+            // Years
+            const years = [...new Set(allProjects.map(p => p.year).filter(Boolean))].sort().reverse();
+            const yearSelect = document.getElementById('yearFilter');
+            years.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            });
+
+            // Categories
+            const categories = [...new Set(allProjects.map(p => p.category).filter(Boolean))].sort();
+            const categorySelect = document.getElementById('categoryFilter');
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                categorySelect.appendChild(option);
+            });
+
+            // Countries
+            const countries = [...new Set(allProjects.map(p => p.country).filter(Boolean))].sort();
+            const countrySelect = document.getElementById('countryFilter');
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                countrySelect.appendChild(option);
+            });
+        }
+
+        function search() {
+            const query = document.getElementById('searchInput').value.trim();
+            const yearFilter = document.getElementById('yearFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const awardFilter = document.getElementById('awardFilter').value;
+            const countryFilter = document.getElementById('countryFilter').value;
+
+            let results;
+
+            if (query) {
+                // Use Fuse.js for fuzzy search
+                const fuseResults = fuse.search(query);
+                results = fuseResults.map(r => ({
+                    ...r.item,
+                    score: r.score,
+                    matches: r.matches
+                }));
+            } else {
+                results = allProjects.map(p => ({ ...p, score: 0 }));
+            }
+
+            // Apply filters
+            if (yearFilter) {
+                results = results.filter(p => p.year === yearFilter);
+            }
+            if (categoryFilter) {
+                results = results.filter(p => p.category === categoryFilter);
+            }
+            if (countryFilter) {
+                results = results.filter(p => p.country === countryFilter);
+            }
+            if (awardFilter === 'has') {
+                results = results.filter(p => p.awards && p.awards.length > 0);
+            } else if (awardFilter === 'none') {
+                results = results.filter(p => !p.awards || p.awards.length === 0);
+            }
+
+            filteredProjects = results;
+            currentPage = 1;
+            updateResults();
+        }
+
+        function updateResults() {
+            const resultsDiv = document.getElementById('results');
+            const statsDiv = document.getElementById('stats');
+
+            // Update stats
+            statsDiv.textContent = `Found ${filteredProjects.length} projects`;
+
+            // Paginate
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+            const pageProjects = filteredProjects.slice(start, end);
+
+            if (pageProjects.length === 0) {
+                resultsDiv.innerHTML = '<div class="no-results">No projects found. Try different search terms.</div>';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            // Render projects
+            resultsDiv.innerHTML = pageProjects.map(project => {
+                const keywords = extractKeywords(project);
+                const bookmarked = isBookmarked(project.id);
+                return `
+                <div class="project-card ${project.awards && project.awards.length > 0 ? 'highlight-card' : ''}">
+                    <div style="display:flex;justify-content:space-between;align-items:start">
+                        <h3 class="project-title" onclick="window.open('https://abstracts.societyforscience.org/Home/FullAbstract?projectId=${project.id}', '_blank')" style="flex:1">
+                            ${highlightText(project.title || 'Untitled', project.matches, 'title')}
+                        </h3>
+                        <span class="bookmark-icon ${bookmarked ? 'saved' : ''}" onclick="toggleBookmark(${project.id})" title="${bookmarked ? 'Remove from library' : 'Save to library'}">
+                            ${bookmarked ? '★' : '☆'}
+                        </span>
+                    </div>
+                    <div class="project-meta">
+                        ${project.year ? `<span class="meta-item year">${project.year}</span>` : ''}
+                        ${project.category ? `<span class="meta-item category">${project.category}</span>` : ''}
+                        ${project.booth ? `<span class="meta-item">${project.booth}</span>` : ''}
+                        ${project.country ? `<span class="meta-item">🌍 ${project.country}</span>` : ''}
+                    </div>
+                    ${keywords.length > 0 ? `
+                        <div class="keywords">
+                            ${keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                    <div class="abstract" id="abstract-${project.id}">
+                        ${highlightText(project.abstract || 'No abstract available', project.matches, 'abstract')}
+                    </div>
+                    <button class="expand-btn" onclick="toggleAbstract(${project.id})">Show more</button>
+                    ${project.awards && project.awards.length > 0 ? `
+                        <div class="awards">
+                            ${project.awards.map(a => `<span class="award-item">${a}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `}).join('');
+
+            // Update pagination
+            updatePagination();
+        }
+
+        function highlightText(text, matches, key) {
+            if (!matches || !text) return text || '';
+
+            const match = matches.find(m => m.key === key);
+            if (!match) return text;
+
+            // Simple highlighting - highlight matched terms
+            let result = text;
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (query) {
+                const terms = query.split(/\s+/);
+                terms.forEach(term => {
+                    if (term.length > 2) {
+                        const regex = new RegExp(`(${term})`, 'gi');
+                        result = result.replace(regex, '<mark>$1</mark>');
+                    }
+                });
+            }
+            return result;
+        }
+
+        function toggleAbstract(id) {
+            const abstract = document.getElementById(`abstract-${id}`);
+            const btn = abstract.nextElementSibling;
+            abstract.classList.toggle('expanded');
+            btn.textContent = abstract.classList.contains('expanded') ? 'Show less' : 'Show more';
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredProjects.length / perPage);
+            const paginationDiv = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                paginationDiv.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+
+            // Previous button
+            html += `<button ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">Previous</button>`;
+
+            // Page numbers
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+
+            // Next button
+            html += `<button ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">Next</button>`;
+
+            paginationDiv.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            updateResults();
+            window.scrollTo(0, 0);
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', debounce(search, 300));
+        document.getElementById('yearFilter').addEventListener('change', search);
+        document.getElementById('categoryFilter').addEventListener('change', search);
+        document.getElementById('awardFilter').addEventListener('change', search);
+        document.getElementById('countryFilter').addEventListener('change', search);
+
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Load on page ready
+        loadProjects();
+    </script>
+</body>
+</html>

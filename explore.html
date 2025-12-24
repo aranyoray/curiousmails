@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISEF Project Explorer - Interactive Graph</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a1628;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(10, 22, 40, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: #60a5fa;
+            white-space: nowrap;
+        }
+
+        .category-selector {
+            position: relative;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            background: rgba(96, 165, 250, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.4);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 200px;
+            justify-content: space-between;
+        }
+
+        .category-btn:hover {
+            background: rgba(96, 165, 250, 0.3);
+        }
+
+        .category-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 5px;
+            background: rgba(20, 35, 60, 0.98);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .category-dropdown.visible {
+            display: block;
+        }
+
+        .category-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .category-option:hover {
+            background: rgba(96, 165, 250, 0.2);
+        }
+
+        .category-option .count {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 14px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #60a5fa;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255,255,255,0.4);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            color: #60a5fa;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .control-btn:hover {
+            background: rgba(96, 165, 250, 0.3);
+        }
+
+        .info-panel {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            width: 380px;
+            max-height: calc(100vh - 100px);
+            background: rgba(20, 35, 60, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+            transform: translateX(420px);
+            transition: transform 0.3s ease;
+            z-index: 90;
+        }
+
+        .info-panel.visible {
+            transform: translateX(0);
+        }
+
+        .info-header {
+            padding: 15px 20px;
+            background: rgba(96, 165, 250, 0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-title {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .info-close {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .info-content {
+            padding: 15px 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        .info-section {
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .project-list {
+            list-style: none;
+        }
+
+        .project-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .project-item:hover {
+            background: rgba(96, 165, 250, 0.2);
+        }
+
+        .project-title {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .project-meta {
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .project-award {
+            color: #fbbf24;
+            margin-top: 4px;
+        }
+
+        .graph-container {
+            width: 100vw;
+            height: 100vh;
+            padding-top: 60px;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .node {
+            cursor: pointer;
+        }
+
+        .node circle {
+            stroke: rgba(255,255,255,0.3);
+            stroke-width: 2px;
+            transition: all 0.2s;
+        }
+
+        .node:hover circle {
+            stroke: #fff;
+            stroke-width: 3px;
+        }
+
+        .node text {
+            fill: #fff;
+            pointer-events: none;
+            text-anchor: middle;
+        }
+
+        .node.dimmed {
+            opacity: 0.1;
+        }
+
+        .link {
+            stroke: rgba(255,255,255,0.08);
+            stroke-width: 1px;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: rgba(20, 35, 60, 0.95);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 300px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        .welcome-screen {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 30px;
+            padding: 40px;
+        }
+
+        .welcome-title {
+            font-size: 28px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .welcome-subtitle {
+            font-size: 16px;
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .category-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-card:hover {
+            background: rgba(96, 165, 250, 0.2);
+            border-color: rgba(96, 165, 250, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .category-card-name {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .category-card-count {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .stats {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(20, 35, 60, 0.8);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .credit-footer {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            z-index: 50;
+        }
+
+        .credit-footer a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+        }
+
+        .credit-footer a:hover {
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">ISEF Explorer</div>
+        <div class="category-selector">
+            <button class="category-btn" id="categoryBtn">
+                <span id="categoryLabel">Select Category</span>
+                <span>▼</span>
+            </button>
+            <div class="category-dropdown" id="categoryDropdown"></div>
+        </div>
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search within category..." disabled>
+        </div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Search View</a>
+        </div>
+    </div>
+
+    <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-title">Explore ISEF Projects</div>
+        <div class="welcome-subtitle">Select a category to explore projects organized by themes and subdomains</div>
+        <div class="category-grid" id="categoryGrid"></div>
+    </div>
+
+    <div class="graph-container" id="graphContainer" style="display:none;">
+        <div class="loading" id="loading" style="display:none;">
+            <div class="loading-spinner"></div>
+            <div>Building visualization...</div>
+        </div>
+    </div>
+
+    <div class="controls" style="display:none;" id="controls">
+        <button class="control-btn" id="zoomIn" title="Zoom In">+</button>
+        <button class="control-btn" id="zoomOut" title="Zoom Out">-</button>
+        <button class="control-btn" id="resetView" title="Reset View">⟲</button>
+        <button class="control-btn" id="backBtn" title="Back to Categories">←</button>
+    </div>
+
+    <div class="info-panel" id="infoPanel">
+        <div class="info-header">
+            <span class="info-title" id="infoPanelTitle">Details</span>
+            <button class="info-close" id="closePanel">&times;</button>
+        </div>
+        <div class="info-content" id="infoPanelContent"></div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+    <div class="stats" id="stats"></div>
+
+    <script>
+        // Common keywords for clustering projects into subdomains
+        const domainKeywords = {
+            'Machine Learning': ['machine learning', 'neural network', 'deep learning', 'ai', 'artificial intelligence', 'classification', 'prediction model', 'convolutional', 'lstm', 'transformer'],
+            'Data Analysis': ['data analysis', 'statistical', 'analytics', 'regression', 'correlation', 'dataset', 'big data'],
+            'Image Processing': ['image', 'computer vision', 'recognition', 'detection', 'segmentation', 'opencv', 'visual'],
+            'Natural Language': ['nlp', 'natural language', 'text', 'sentiment', 'speech', 'language processing'],
+            'Robotics': ['robot', 'autonomous', 'control system', 'sensor', 'actuator', 'navigation'],
+            'Web/Mobile': ['web', 'mobile', 'app', 'application', 'interface', 'user experience'],
+            'Security': ['security', 'encryption', 'cyber', 'privacy', 'authentication', 'malware'],
+            'Networks': ['network', 'iot', 'wireless', 'communication', 'protocol', 'distributed'],
+            'Cancer Research': ['cancer', 'tumor', 'oncology', 'carcinoma', 'metastasis', 'chemotherapy'],
+            'Genetics': ['gene', 'dna', 'rna', 'genetic', 'mutation', 'crispr', 'genome', 'sequencing'],
+            'Drug Discovery': ['drug', 'pharmaceutical', 'therapeutic', 'compound', 'inhibitor', 'treatment'],
+            'Diagnostics': ['diagnosis', 'diagnostic', 'biomarker', 'detection', 'screening', 'test'],
+            'Neuroscience': ['brain', 'neural', 'neuron', 'cognitive', 'alzheimer', 'parkinson'],
+            'Immunology': ['immune', 'antibody', 'vaccine', 'inflammation', 'autoimmune'],
+            'Cell Biology': ['cell', 'cellular', 'stem cell', 'proliferation', 'apoptosis'],
+            'Proteins': ['protein', 'enzyme', 'amino acid', 'peptide', 'structural'],
+            'Climate': ['climate', 'global warming', 'carbon', 'greenhouse', 'temperature'],
+            'Pollution': ['pollution', 'contaminant', 'remediation', 'toxic', 'waste'],
+            'Water': ['water', 'aquatic', 'marine', 'ocean', 'filtration', 'purification'],
+            'Biodiversity': ['species', 'ecosystem', 'biodiversity', 'conservation', 'habitat'],
+            'Agriculture': ['plant', 'crop', 'soil', 'fertilizer', 'growth', 'yield'],
+            'Renewable Energy': ['solar', 'wind', 'renewable', 'sustainable', 'photovoltaic'],
+            'Batteries': ['battery', 'energy storage', 'lithium', 'supercapacitor', 'electrochemical'],
+            'Fuel Cells': ['fuel cell', 'hydrogen', 'catalyst', 'electrolysis'],
+            'Synthesis': ['synthesis', 'synthesize', 'compound', 'reaction', 'organic'],
+            'Nanomaterials': ['nano', 'nanoparticle', 'graphene', 'quantum dot', 'nanoscale'],
+            'Catalysis': ['catalyst', 'catalytic', 'oxidation', 'reduction'],
+            'Polymers': ['polymer', 'plastic', 'biodegradable', 'composite'],
+            'Astrophysics': ['star', 'galaxy', 'exoplanet', 'cosmic', 'telescope'],
+            'Quantum': ['quantum', 'entanglement', 'qubit', 'superposition'],
+            'Optics': ['light', 'laser', 'optical', 'photon', 'spectroscopy'],
+            'Mechanics': ['force', 'motion', 'vibration', 'stress', 'strain'],
+            'Prosthetics': ['prosthetic', 'prosthesis', 'limb', 'assistive'],
+            'Medical Devices': ['device', 'wearable', 'sensor', 'monitor', 'implant'],
+            '3D Printing': ['3d print', 'additive manufacturing', 'bioprint'],
+            'Algorithms': ['algorithm', 'optimization', 'computational', 'efficiency'],
+            'Mathematics': ['theorem', 'proof', 'conjecture', 'equation', 'mathematical'],
+            'Modeling': ['model', 'simulation', 'finite element', 'computational'],
+            'Other': []
+        };
+
+        let allProjects = [];
+        let categories = {};
+        let currentCategory = null;
+        let simulation, svg, g, node, link, zoom;
+        let navigationStack = []; // Track drill-down history
+        let currentClusterName = null;
+
+        // Sub-domain keywords for deeper clustering
+        const subDomainKeywords = {
+            'Water Quality': ['water quality', 'contamination', 'drinking water', 'groundwater', 'ph level'],
+            'Marine Life': ['marine', 'ocean', 'fish', 'coral', 'aquatic life', 'sea'],
+            'Freshwater': ['lake', 'river', 'stream', 'pond', 'freshwater'],
+            'Filtration': ['filter', 'filtration', 'purification', 'membrane', 'reverse osmosis'],
+            'Wastewater': ['wastewater', 'sewage', 'treatment plant', 'effluent'],
+            'Air Quality': ['air quality', 'particulate', 'pm2.5', 'smog', 'emissions'],
+            'Soil Health': ['soil', 'erosion', 'nutrients', 'composting', 'land'],
+            'Wildlife': ['animal', 'species', 'habitat', 'migration', 'population'],
+            'Forest': ['tree', 'forest', 'deforestation', 'vegetation', 'woodland'],
+            'Urban Environment': ['urban', 'city', 'traffic', 'noise pollution'],
+            'Breast Cancer': ['breast cancer', 'mammary', 'brca'],
+            'Lung Cancer': ['lung cancer', 'pulmonary', 'respiratory cancer'],
+            'Brain Cancer': ['glioma', 'glioblastoma', 'brain tumor', 'neuroblastoma'],
+            'Leukemia': ['leukemia', 'lymphoma', 'blood cancer'],
+            'Skin Cancer': ['melanoma', 'skin cancer', 'carcinoma'],
+            'Tumor Biology': ['tumor', 'metastasis', 'angiogenesis', 'invasion'],
+            'Cancer Treatment': ['chemotherapy', 'radiation', 'immunotherapy', 'targeted therapy'],
+            'Solar Energy': ['solar panel', 'photovoltaic', 'solar cell', 'sunlight'],
+            'Wind Energy': ['wind turbine', 'wind power', 'wind energy'],
+            'Biofuel': ['biofuel', 'biodiesel', 'ethanol', 'biomass energy'],
+            'Hydrogen': ['hydrogen', 'fuel cell', 'electrolysis', 'h2'],
+            'Energy Storage': ['battery', 'supercapacitor', 'energy storage', 'lithium'],
+            'CNN/Deep Learning': ['cnn', 'convolutional', 'deep learning', 'neural network'],
+            'NLP': ['nlp', 'natural language', 'text', 'sentiment', 'chatbot'],
+            'Computer Vision': ['image recognition', 'object detection', 'face', 'visual'],
+            'Reinforcement Learning': ['reinforcement', 'q-learning', 'agent', 'reward'],
+            'Medical AI': ['medical imaging', 'diagnosis', 'healthcare ai', 'radiology'],
+            'CRISPR': ['crispr', 'cas9', 'gene editing', 'knockout'],
+            'Gene Expression': ['gene expression', 'transcription', 'mrna', 'promoter'],
+            'Mutations': ['mutation', 'variant', 'snp', 'polymorphism'],
+            'Sequencing': ['sequencing', 'genomics', 'whole genome', 'exome'],
+            'Epigenetics': ['epigenetic', 'methylation', 'histone', 'chromatin'],
+            'Diagnostics': ['diagnostic', 'biomarker', 'screening', 'early detection'],
+            'Drug Delivery': ['drug delivery', 'nanoparticle', 'targeted', 'encapsulation'],
+            'Vaccines': ['vaccine', 'immunization', 'antibody', 'antigen'],
+            'Prosthetics': ['prosthetic', 'limb', 'amputation', 'bionic'],
+            'Wearables': ['wearable', 'smartwatch', 'fitness tracker', 'health monitor'],
+            'Other': []
+        };
+
+        // Load data
+        async function loadData() {
+            try {
+                const response = await fetch('data/projects.json');
+                allProjects = await response.json();
+                processCategories();
+                renderCategorySelection();
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        function processCategories() {
+            allProjects.forEach(project => {
+                // Use multi-category array if available, otherwise fall back to single category
+                const projectCategories = project.categories || [project.category || 'Other'];
+
+                projectCategories.forEach(cat => {
+                    if (!categories[cat]) {
+                        categories[cat] = [];
+                    }
+                    categories[cat].push(project);
+                });
+            });
+        }
+
+        function renderCategorySelection() {
+            const grid = document.getElementById('categoryGrid');
+            const dropdown = document.getElementById('categoryDropdown');
+
+            const sortedCats = Object.keys(categories).sort((a, b) =>
+                categories[b].length - categories[a].length
+            );
+
+            grid.innerHTML = sortedCats.map(cat => `
+                <div class="category-card" onclick="selectCategory('${cat.replace(/'/g, "\\'")}')">
+                    <div class="category-card-name">${cat}</div>
+                    <div class="category-card-count">${categories[cat].length} projects</div>
+                </div>
+            `).join('');
+
+            dropdown.innerHTML = sortedCats.map(cat => `
+                <div class="category-option" onclick="selectCategory('${cat.replace(/'/g, "\\'")}')">
+                    <span>${cat}</span>
+                    <span class="count">${categories[cat].length}</span>
+                </div>
+            `).join('');
+        }
+
+        function selectCategory(categoryName) {
+            currentCategory = categoryName;
+            currentClusterName = null;
+            navigationStack = []; // Reset navigation
+            document.getElementById('categoryLabel').textContent = categoryName;
+            document.getElementById('categoryDropdown').classList.remove('visible');
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('graphContainer').style.display = 'block';
+            document.getElementById('controls').style.display = 'flex';
+            document.getElementById('searchInput').disabled = false;
+            document.getElementById('searchInput').placeholder = `Search in ${categoryName}...`;
+            document.getElementById('loading').style.display = 'block';
+
+            setTimeout(() => {
+                buildCategoryGraph(categoryName);
+                document.getElementById('loading').style.display = 'none';
+            }, 100);
+        }
+
+        // Word boundary matching to avoid false positives like "fluid" matching "fluid intelligence"
+        function matchesKeyword(text, keyword) {
+            // Use word boundary regex for accurate matching
+            const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+            return regex.test(text);
+        }
+
+        // Compute text similarity between two projects using cached word sets
+        const projectWordCache = new Map();
+
+        function getProjectWords(project) {
+            if (projectWordCache.has(project.id)) {
+                return projectWordCache.get(project.id);
+            }
+
+            const text = ((project.title || '') + ' ' + (project.abstract || '')).toLowerCase();
+            const stopwords = new Set(['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'has', 'her', 'was', 'one', 'our', 'out', 'this', 'that', 'with', 'from', 'have', 'were', 'been', 'which', 'their', 'there', 'would', 'could', 'should', 'these', 'those', 'into', 'than', 'then', 'also', 'more', 'some', 'such', 'only', 'other', 'when', 'what', 'where', 'while', 'about', 'after', 'before', 'between', 'through', 'during', 'each', 'both', 'using', 'used']);
+
+            const words = new Set(
+                (text.match(/\b[a-z]{3,}\b/g) || []).filter(w => !stopwords.has(w))
+            );
+
+            projectWordCache.set(project.id, words);
+            return words;
+        }
+
+        function computeSimilarity(proj1, proj2) {
+            const words1 = getProjectWords(proj1);
+            const words2 = getProjectWords(proj2);
+
+            // Jaccard similarity
+            const intersection = [...words1].filter(w => words2.has(w)).length;
+            const union = new Set([...words1, ...words2]).size;
+
+            return union > 0 ? intersection / union : 0;
+        }
+
+        function clusterProjects(projects) {
+            const clusters = {};
+            const assigned = new Set();
+
+            // Assign projects to clusters based on keywords with word boundary matching
+            projects.forEach(project => {
+                const text = ((project.title || '') + ' ' + (project.abstract || '')).toLowerCase();
+                let bestMatch = null;
+                let bestScore = 0;
+
+                for (const [domain, keywords] of Object.entries(domainKeywords)) {
+                    if (domain === 'Other') continue;
+                    const score = keywords.filter(kw => matchesKeyword(text, kw)).length;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMatch = domain;
+                    }
+                }
+
+                if (bestMatch && bestScore >= 1) {
+                    if (!clusters[bestMatch]) clusters[bestMatch] = [];
+                    clusters[bestMatch].push(project);
+                    assigned.add(project.id);
+                }
+            });
+
+            // Add unassigned to "Other"
+            const unassigned = projects.filter(p => !assigned.has(p.id));
+            if (unassigned.length > 0) {
+                clusters['Other'] = unassigned;
+            }
+
+            // Remove clusters with too few projects and merge into Other
+            const minSize = 3;
+            Object.keys(clusters).forEach(key => {
+                if (key !== 'Other' && clusters[key].length < minSize) {
+                    if (!clusters['Other']) clusters['Other'] = [];
+                    clusters['Other'].push(...clusters[key]);
+                    delete clusters[key];
+                }
+            });
+
+            return clusters;
+        }
+
+        function buildCategoryGraph(categoryName) {
+            const projects = categories[categoryName];
+            const clusters = clusterProjects(projects);
+
+            // Clear previous
+            d3.select('#graphContainer svg').remove();
+
+            const container = document.getElementById('graphContainer');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            svg = d3.select('#graphContainer')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            zoom = d3.zoom()
+                .scaleExtent([0.2, 3])
+                .on('zoom', (event) => g.attr('transform', event.transform));
+
+            svg.call(zoom);
+            g = svg.append('g');
+
+            // Build nodes
+            const nodes = [];
+            const links = [];
+
+            // Add cluster nodes (subdomains)
+            Object.keys(clusters).forEach(clusterName => {
+                const clusterProjects = clusters[clusterName];
+                const clusterNode = {
+                    id: 'cluster_' + clusterName,
+                    name: clusterName,
+                    type: 'cluster',
+                    count: clusterProjects.length,
+                    projects: clusterProjects,
+                    radius: Math.sqrt(clusterProjects.length) * 4 + 15
+                };
+                nodes.push(clusterNode);
+
+                // Sample projects as child nodes (limit to avoid clutter)
+                const sampleSize = Math.min(clusterProjects.length, 8);
+                const sampled = clusterProjects.slice(0, sampleSize);
+
+                sampled.forEach(project => {
+                    const projectNode = {
+                        id: 'project_' + project.id,
+                        name: project.title,
+                        type: 'project',
+                        project: project,
+                        radius: 6,
+                        parent: clusterNode.id
+                    };
+                    nodes.push(projectNode);
+                    links.push({
+                        source: clusterNode.id,
+                        target: projectNode.id
+                    });
+                });
+            });
+
+            // Create links between clusters (for layout)
+            const clusterNodes = nodes.filter(n => n.type === 'cluster');
+            for (let i = 0; i < clusterNodes.length; i++) {
+                for (let j = i + 1; j < clusterNodes.length; j++) {
+                    links.push({
+                        source: clusterNodes[i].id,
+                        target: clusterNodes[j].id,
+                        strength: 0.02
+                    });
+                }
+            }
+
+            // Draw links
+            link = g.append('g')
+                .selectAll('line')
+                .data(links)
+                .enter()
+                .append('line')
+                .attr('class', 'link');
+
+            // Draw nodes
+            node = g.append('g')
+                .selectAll('.node')
+                .data(nodes)
+                .enter()
+                .append('g')
+                .attr('class', d => `node ${d.type}`)
+                .call(d3.drag()
+                    .on('start', dragStarted)
+                    .on('drag', dragged)
+                    .on('end', dragEnded))
+                .on('click', nodeClicked)
+                .on('mouseover', nodeHovered)
+                .on('mouseout', nodeUnhovered);
+
+            node.append('circle')
+                .attr('r', d => d.radius)
+                .attr('fill', d => d.type === 'cluster' ? getClusterColor(d.name) : 'rgba(255,255,255,0.6)')
+                .attr('fill-opacity', d => d.type === 'cluster' ? 0.8 : 0.7);
+
+            // Labels for clusters
+            node.filter(d => d.type === 'cluster')
+                .append('text')
+                .attr('dy', 4)
+                .attr('font-size', d => Math.min(12, d.radius / 3))
+                .attr('font-weight', 500)
+                .text(d => d.name.length > 15 ? d.name.substring(0, 13) + '...' : d.name);
+
+            // Simulation with faster settling
+            simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links).id(d => d.id).distance(d =>
+                    d.source.type === 'cluster' && d.target.type === 'cluster' ? 180 : 45
+                ).strength(d => d.strength || 0.4))
+                .force('charge', d3.forceManyBody().strength(d => d.type === 'cluster' ? -180 : -25))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(d => d.radius + 4))
+                .alphaDecay(0.04)
+                .velocityDecay(0.35)
+                .on('tick', ticked);
+
+            // Update stats
+            document.getElementById('stats').textContent =
+                `${projects.length} projects · ${Object.keys(clusters).length} themes`;
+        }
+
+        function getClusterColor(name) {
+            const colors = {
+                'Machine Learning': '#8b5cf6',
+                'Data Analysis': '#6366f1',
+                'Image Processing': '#3b82f6',
+                'Natural Language': '#0ea5e9',
+                'Robotics': '#f43f5e',
+                'Web/Mobile': '#10b981',
+                'Security': '#ef4444',
+                'Networks': '#06b6d4',
+                'Cancer Research': '#f472b6',
+                'Genetics': '#a78bfa',
+                'Drug Discovery': '#34d399',
+                'Diagnostics': '#fbbf24',
+                'Neuroscience': '#c084fc',
+                'Immunology': '#f87171',
+                'Cell Biology': '#4ade80',
+                'Proteins': '#2dd4bf',
+                'Climate': '#84cc16',
+                'Pollution': '#f97316',
+                'Water': '#22d3ee',
+                'Biodiversity': '#a3e635',
+                'Agriculture': '#65a30d',
+                'Renewable Energy': '#facc15',
+                'Batteries': '#fb923c',
+                'Fuel Cells': '#eab308',
+                'Synthesis': '#60a5fa',
+                'Nanomaterials': '#818cf8',
+                'Catalysis': '#c084fc',
+                'Polymers': '#e879f9',
+                'Astrophysics': '#38bdf8',
+                'Quantum': '#a855f7',
+                'Optics': '#14b8a6',
+                'Mechanics': '#94a3b8',
+                'Prosthetics': '#fb7185',
+                'Medical Devices': '#f472b6',
+                '3D Printing': '#fbbf24',
+                'Algorithms': '#6366f1',
+                'Mathematics': '#8b5cf6',
+                'Modeling': '#3b82f6',
+                'Other': '#64748b'
+            };
+            return colors[name] || '#60a5fa';
+        }
+
+        function ticked() {
+            link
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+
+            node.attr('transform', d => `translate(${d.x},${d.y})`);
+        }
+
+        function dragStarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragEnded(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        function nodeClicked(event, d) {
+            event.stopPropagation();
+            if (d.type === 'cluster') {
+                // If cluster has 50+ projects, drill down into sub-clusters
+                if (d.count >= 50) {
+                    drillIntoCluster(d);
+                } else {
+                    // Show projects as bubbles at final level
+                    showProjectBubbles(d);
+                }
+            } else {
+                window.open(`https://abstracts.societyforscience.org/Home/FullAbstract?projectId=${d.project.id}`, '_blank');
+            }
+        }
+
+        // Show projects as individual bubbles with similarity-based positioning
+        function showProjectBubbles(clusterData) {
+            navigationStack.push({
+                category: currentCategory,
+                clusterName: currentClusterName
+            });
+            currentClusterName = clusterData.name;
+
+            const projects = clusterData.projects;
+
+            // Clear previous
+            d3.select('#graphContainer svg').remove();
+
+            const container = document.getElementById('graphContainer');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            svg = d3.select('#graphContainer')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            zoom = d3.zoom()
+                .scaleExtent([0.2, 3])
+                .on('zoom', (event) => g.attr('transform', event.transform));
+
+            svg.call(zoom);
+            g = svg.append('g');
+
+            // Build project nodes
+            const nodes = projects.map(project => {
+                const hasAward = project.awards && project.awards.trim() !== '';
+                return {
+                    id: 'project_' + project.id,
+                    name: project.title,
+                    type: 'project',
+                    project: project,
+                    hasAward: hasAward,
+                    radius: hasAward ? 12 : 8
+                };
+            });
+
+            // Build links based on similarity
+            const links = [];
+            const similarityThreshold = 0.15;
+
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const sim = computeSimilarity(nodes[i].project, nodes[j].project);
+                    if (sim >= similarityThreshold) {
+                        links.push({
+                            source: nodes[i].id,
+                            target: nodes[j].id,
+                            strength: sim
+                        });
+                    }
+                }
+            }
+
+            // Draw links
+            link = g.append('g')
+                .selectAll('line')
+                .data(links)
+                .enter()
+                .append('line')
+                .attr('class', 'link')
+                .style('stroke-opacity', d => Math.min(d.strength * 3, 0.4));
+
+            // Draw nodes
+            node = g.append('g')
+                .selectAll('.node')
+                .data(nodes)
+                .enter()
+                .append('g')
+                .attr('class', 'node project')
+                .call(d3.drag()
+                    .on('start', dragStarted)
+                    .on('drag', dragged)
+                    .on('end', dragEnded))
+                .on('click', nodeClicked)
+                .on('mouseover', nodeHovered)
+                .on('mouseout', nodeUnhovered);
+
+            node.append('circle')
+                .attr('r', d => d.radius)
+                .attr('fill', d => d.hasAward ? '#fbbf24' : 'rgba(255,255,255,0.7)')
+                .attr('stroke', d => d.hasAward ? '#f59e0b' : 'rgba(255,255,255,0.3)')
+                .attr('stroke-width', d => d.hasAward ? 2 : 1);
+
+            // Simulation with faster settling
+            simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links)
+                    .id(d => d.id)
+                    .distance(d => 60 * (1 - d.strength))
+                    .strength(d => d.strength * 0.8))
+                .force('charge', d3.forceManyBody().strength(-40))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(d => d.radius + 2))
+                .alphaDecay(0.05)
+                .velocityDecay(0.4)
+                .on('tick', ticked);
+
+            // Update stats
+            const awardCount = projects.filter(p => p.awards && p.awards.trim()).length;
+            document.getElementById('stats').textContent =
+                `${projects.length} projects · ${awardCount} award winners · Click ← to go back`;
+        }
+
+        function drillIntoCluster(clusterData) {
+            // Save current state to navigation stack
+            navigationStack.push({
+                category: currentCategory,
+                clusterName: currentClusterName
+            });
+
+            const wasSubdomain = currentClusterName !== null;
+            currentClusterName = clusterData.name;
+
+            // Create sub-clusters from this cluster's projects
+            // If we're already in a subdomain, use dynamic term extraction
+            let subClusters;
+            if (wasSubdomain) {
+                subClusters = clusterByTerms(clusterData.projects);
+            } else {
+                subClusters = clusterProjectsDeep(clusterData.projects);
+            }
+
+            // Rebuild graph with sub-clusters
+            buildSubClusterGraph(clusterData.name, subClusters, clusterData.projects.length);
+
+            // Update stats
+            document.getElementById('stats').textContent =
+                `${clusterData.count} projects · ${Object.keys(subClusters).length} sub-themes · Click ← to go back`;
+        }
+
+        // Extract common meaningful terms from projects for dynamic clustering
+        function extractCommonTerms(projects) {
+            const stopwords = new Set(['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'has', 'her', 'was', 'one', 'our', 'out', 'this', 'that', 'with', 'from', 'have', 'were', 'been', 'which', 'their', 'there', 'would', 'could', 'should', 'these', 'those', 'into', 'than', 'then', 'also', 'more', 'some', 'such', 'only', 'other', 'when', 'what', 'where', 'while', 'about', 'after', 'before', 'between', 'through', 'during', 'each', 'both', 'using', 'used', 'study', 'research', 'project', 'result', 'method', 'effect', 'found', 'show', 'based', 'different', 'various', 'specific', 'increase', 'decrease', 'level', 'high', 'low', 'new', 'use', 'order', 'well', 'however', 'thus', 'therefore']);
+
+            const termCounts = {};
+
+            projects.forEach(p => {
+                const text = ((p.title || '') + ' ' + (p.abstract || '')).toLowerCase();
+                const words = text.match(/\b[a-z]{4,}\b/g) || [];
+                const seen = new Set();
+
+                words.forEach(word => {
+                    if (!stopwords.has(word) && !seen.has(word)) {
+                        seen.add(word);
+                        termCounts[word] = (termCounts[word] || 0) + 1;
+                    }
+                });
+            });
+
+            // Get terms that appear in 10-60% of projects (good discriminators)
+            const minCount = Math.max(3, projects.length * 0.1);
+            const maxCount = projects.length * 0.6;
+
+            return Object.entries(termCounts)
+                .filter(([term, count]) => count >= minCount && count <= maxCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 15)
+                .map(([term]) => term);
+        }
+
+        // Cluster by automatically extracted terms
+        function clusterByTerms(projects) {
+            const clusters = {};
+            const assigned = new Set();
+            const terms = extractCommonTerms(projects);
+
+            if (terms.length === 0) {
+                return clusterByYear(projects);
+            }
+
+            projects.forEach(project => {
+                const text = ((project.title || '') + ' ' + (project.abstract || '')).toLowerCase();
+                let bestTerm = null;
+                let bestScore = 0;
+
+                terms.forEach(term => {
+                    if (matchesKeyword(text, term)) {
+                        const score = (text.match(new RegExp(`\\b${term}\\b`, 'gi')) || []).length;
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestTerm = term;
+                        }
+                    }
+                });
+
+                if (bestTerm) {
+                    // Capitalize for display
+                    const label = bestTerm.charAt(0).toUpperCase() + bestTerm.slice(1);
+                    if (!clusters[label]) clusters[label] = [];
+                    clusters[label].push(project);
+                    assigned.add(project.id);
+                }
+            });
+
+            // Add unassigned
+            const unassigned = projects.filter(p => !assigned.has(p.id));
+            if (unassigned.length > 0) {
+                clusters['Other'] = unassigned;
+            }
+
+            // Merge small clusters
+            Object.keys(clusters).forEach(key => {
+                if (key !== 'Other' && clusters[key].length < 3) {
+                    if (!clusters['Other']) clusters['Other'] = [];
+                    clusters['Other'].push(...clusters[key]);
+                    delete clusters[key];
+                }
+            });
+
+            return clusters;
+        }
+
+        // Cluster by year
+        function clusterByYear(projects) {
+            const clusters = {};
+            projects.forEach(p => {
+                const year = p.year || 'Unknown';
+                if (!clusters[year]) clusters[year] = [];
+                clusters[year].push(p);
+            });
+            return clusters;
+        }
+
+        function clusterProjectsDeep(projects) {
+            const clusters = {};
+            const assigned = new Set();
+
+            // Use sub-domain keywords for finer clustering with word boundary matching
+            projects.forEach(project => {
+                const text = ((project.title || '') + ' ' + (project.abstract || '')).toLowerCase();
+                let bestMatch = null;
+                let bestScore = 0;
+
+                for (const [domain, keywords] of Object.entries(subDomainKeywords)) {
+                    if (domain === 'Other') continue;
+                    const score = keywords.filter(kw => matchesKeyword(text, kw)).length;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMatch = domain;
+                    }
+                }
+
+                if (bestMatch && bestScore >= 1) {
+                    if (!clusters[bestMatch]) clusters[bestMatch] = [];
+                    clusters[bestMatch].push(project);
+                    assigned.add(project.id);
+                }
+            });
+
+            // Cluster remaining by year if many unassigned
+            const unassigned = projects.filter(p => !assigned.has(p.id));
+            if (unassigned.length > 20) {
+                // Group by year
+                const byYear = {};
+                unassigned.forEach(p => {
+                    const year = p.year || 'Unknown';
+                    if (!byYear[year]) byYear[year] = [];
+                    byYear[year].push(p);
+                });
+                Object.entries(byYear).forEach(([year, projs]) => {
+                    if (projs.length >= 3) {
+                        clusters[`Year ${year}`] = projs;
+                    } else {
+                        if (!clusters['Other']) clusters['Other'] = [];
+                        clusters['Other'].push(...projs);
+                    }
+                });
+            } else if (unassigned.length > 0) {
+                clusters['Other'] = unassigned;
+            }
+
+            // Merge small clusters
+            const minSize = 3;
+            Object.keys(clusters).forEach(key => {
+                if (key !== 'Other' && clusters[key].length < minSize) {
+                    if (!clusters['Other']) clusters['Other'] = [];
+                    clusters['Other'].push(...clusters[key]);
+                    delete clusters[key];
+                }
+            });
+
+            return clusters;
+        }
+
+        function buildSubClusterGraph(parentName, clusters, totalProjects) {
+            // Clear previous
+            d3.select('#graphContainer svg').remove();
+
+            const container = document.getElementById('graphContainer');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            svg = d3.select('#graphContainer')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            zoom = d3.zoom()
+                .scaleExtent([0.2, 3])
+                .on('zoom', (event) => g.attr('transform', event.transform));
+
+            svg.call(zoom);
+            g = svg.append('g');
+
+            const nodes = [];
+            const links = [];
+
+            // Add sub-cluster nodes
+            Object.keys(clusters).forEach(clusterName => {
+                const clusterProjects = clusters[clusterName];
+                const clusterNode = {
+                    id: 'subcluster_' + clusterName,
+                    name: clusterName,
+                    type: 'cluster',
+                    count: clusterProjects.length,
+                    projects: clusterProjects,
+                    radius: Math.sqrt(clusterProjects.length) * 5 + 12
+                };
+                nodes.push(clusterNode);
+
+                // Sample projects
+                const sampleSize = Math.min(clusterProjects.length, 6);
+                const sampled = clusterProjects.slice(0, sampleSize);
+
+                sampled.forEach(project => {
+                    const projectNode = {
+                        id: 'project_' + project.id,
+                        name: project.title,
+                        type: 'project',
+                        project: project,
+                        radius: 5,
+                        parent: clusterNode.id
+                    };
+                    nodes.push(projectNode);
+                    links.push({
+                        source: clusterNode.id,
+                        target: projectNode.id
+                    });
+                });
+            });
+
+            // Links between sub-clusters
+            const clusterNodes = nodes.filter(n => n.type === 'cluster');
+            for (let i = 0; i < clusterNodes.length; i++) {
+                for (let j = i + 1; j < clusterNodes.length; j++) {
+                    links.push({
+                        source: clusterNodes[i].id,
+                        target: clusterNodes[j].id,
+                        strength: 0.02
+                    });
+                }
+            }
+
+            // Draw
+            link = g.append('g')
+                .selectAll('line')
+                .data(links)
+                .enter()
+                .append('line')
+                .attr('class', 'link');
+
+            node = g.append('g')
+                .selectAll('.node')
+                .data(nodes)
+                .enter()
+                .append('g')
+                .attr('class', d => `node ${d.type}`)
+                .call(d3.drag()
+                    .on('start', dragStarted)
+                    .on('drag', dragged)
+                    .on('end', dragEnded))
+                .on('click', nodeClicked)
+                .on('mouseover', nodeHovered)
+                .on('mouseout', nodeUnhovered);
+
+            node.append('circle')
+                .attr('r', d => d.radius)
+                .attr('fill', d => d.type === 'cluster' ? getClusterColor(d.name) : 'rgba(255,255,255,0.6)')
+                .attr('fill-opacity', d => d.type === 'cluster' ? 0.8 : 0.7);
+
+            node.filter(d => d.type === 'cluster')
+                .append('text')
+                .attr('dy', 4)
+                .attr('font-size', d => Math.min(11, d.radius / 3))
+                .attr('font-weight', 500)
+                .text(d => d.name.length > 12 ? d.name.substring(0, 10) + '...' : d.name);
+
+            simulation = d3.forceSimulation(nodes)
+                .force('link', d3.forceLink(links).id(d => d.id).distance(d =>
+                    d.source.type === 'cluster' && d.target.type === 'cluster' ? 140 : 35
+                ).strength(d => d.strength || 0.4))
+                .force('charge', d3.forceManyBody().strength(d => d.type === 'cluster' ? -140 : -18))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(d => d.radius + 4))
+                .alphaDecay(0.04)
+                .velocityDecay(0.35)
+                .on('tick', ticked);
+        }
+
+        function goBackLevel() {
+            if (navigationStack.length > 0) {
+                const prev = navigationStack.pop();
+                currentClusterName = prev.clusterName;
+
+                if (prev.clusterName === null) {
+                    // Go back to category view
+                    buildCategoryGraph(currentCategory);
+                } else {
+                    // Find the cluster data and rebuild
+                    const projects = categories[currentCategory];
+                    const clusters = clusterProjects(projects);
+                    const clusterData = {
+                        name: prev.clusterName,
+                        projects: clusters[prev.clusterName],
+                        count: clusters[prev.clusterName].length
+                    };
+                    const subClusters = clusterProjectsDeep(clusterData.projects);
+                    buildSubClusterGraph(prev.clusterName, subClusters, clusterData.count);
+                }
+            } else {
+                // Go back to category selection
+                goBack();
+            }
+        }
+
+        function nodeHovered(event, d) {
+            const tooltip = document.getElementById('tooltip');
+            if (d.type === 'cluster') {
+                tooltip.innerHTML = `<strong>${d.name}</strong><br>${d.count} projects`;
+            } else {
+                tooltip.innerHTML = `<strong>${d.name}</strong><br>Click to view`;
+            }
+            tooltip.style.left = (event.pageX + 15) + 'px';
+            tooltip.style.top = (event.pageY + 15) + 'px';
+            tooltip.classList.add('visible');
+
+            // Dim unrelated nodes
+            if (d.type === 'cluster') {
+                node.classed('dimmed', n => n.type === 'project' && n.parent !== d.id);
+            }
+        }
+
+        function nodeUnhovered() {
+            document.getElementById('tooltip').classList.remove('visible');
+            node.classed('dimmed', false);
+        }
+
+        function showClusterPanel(d) {
+            const panel = document.getElementById('infoPanel');
+            document.getElementById('infoPanelTitle').textContent = d.name;
+
+            // Get search query
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            // Filter projects if search is active
+            let projects = d.projects;
+            if (query) {
+                projects = d.projects.filter(p => {
+                    const text = ((p.title || '') + ' ' + (p.abstract || '')).toLowerCase();
+                    return text.includes(query);
+                });
+            }
+
+            // Group by year
+            const byYear = {};
+            projects.forEach(p => {
+                const year = p.year || 'Unknown';
+                if (!byYear[year]) byYear[year] = [];
+                byYear[year].push(p);
+            });
+
+            let html = `
+                <div class="info-section">
+                    <div class="info-label">${query ? 'Matching Projects' : 'Projects'}</div>
+                    <div class="info-value">${projects.length}${query ? ` of ${d.count}` : ''}</div>
+                </div>
+            `;
+
+            if (projects.length === 0) {
+                html += `<div class="info-section"><div class="info-label">No matches found</div></div>`;
+            }
+
+            Object.keys(byYear).sort().reverse().forEach(year => {
+                html += `
+                    <div class="info-section">
+                        <div class="info-label">${year} (${byYear[year].length})</div>
+                        <ul class="project-list">
+                            ${byYear[year].map(p => `
+                                <li class="project-item" onclick="window.open('https://abstracts.societyforscience.org/Home/FullAbstract?projectId=${p.id}', '_blank')">
+                                    <div class="project-title">${p.title || 'Untitled'}</div>
+                                    <div class="project-meta">${p.year || ''}</div>
+                                    ${p.awards && p.awards.length ? `<div class="project-award">🏆 ${p.awards[0].substring(0, 60)}${p.awards[0].length > 60 ? '...' : ''}</div>` : ''}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+            });
+
+            document.getElementById('infoPanelContent').innerHTML = html;
+            panel.classList.add('visible');
+        }
+
+        function searchInCategory(query) {
+            if (!query || !currentCategory) {
+                node.classed('dimmed', false);
+                return;
+            }
+
+            query = query.toLowerCase();
+
+            node.classed('dimmed', d => {
+                if (d.type === 'cluster') {
+                    return !d.projects.some(p =>
+                        (p.title && p.title.toLowerCase().includes(query)) ||
+                        (p.abstract && p.abstract.toLowerCase().includes(query))
+                    );
+                } else {
+                    const p = d.project;
+                    return !((p.title && p.title.toLowerCase().includes(query)) ||
+                             (p.abstract && p.abstract.toLowerCase().includes(query)));
+                }
+            });
+        }
+
+        function goBack() {
+            currentCategory = null;
+            document.getElementById('categoryLabel').textContent = 'Select Category';
+            document.getElementById('welcomeScreen').style.display = 'flex';
+            document.getElementById('graphContainer').style.display = 'none';
+            document.getElementById('controls').style.display = 'none';
+            document.getElementById('infoPanel').classList.remove('visible');
+            document.getElementById('searchInput').disabled = true;
+            document.getElementById('searchInput').value = '';
+            document.getElementById('stats').textContent = '';
+        }
+
+        // Event listeners
+        document.getElementById('categoryBtn').addEventListener('click', () => {
+            document.getElementById('categoryDropdown').classList.toggle('visible');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.category-selector')) {
+                document.getElementById('categoryDropdown').classList.remove('visible');
+            }
+        });
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchInCategory(e.target.value);
+        });
+
+        document.getElementById('closePanel').addEventListener('click', () => {
+            document.getElementById('infoPanel').classList.remove('visible');
+        });
+
+        document.getElementById('zoomIn').addEventListener('click', () => {
+            svg.transition().call(zoom.scaleBy, 1.3);
+        });
+
+        document.getElementById('zoomOut').addEventListener('click', () => {
+            svg.transition().call(zoom.scaleBy, 0.7);
+        });
+
+        document.getElementById('resetView').addEventListener('click', () => {
+            const container = document.getElementById('graphContainer');
+            svg.transition().duration(750).call(
+                zoom.transform,
+                d3.zoomIdentity
+            );
+        });
+
+        document.getElementById('backBtn').addEventListener('click', goBackLevel);
+
+        window.addEventListener('resize', () => {
+            if (currentCategory && simulation) {
+                const container = document.getElementById('graphContainer');
+                svg.attr('width', container.clientWidth).attr('height', container.clientHeight);
+                simulation.force('center', d3.forceCenter(container.clientWidth / 2, container.clientHeight / 2));
+                simulation.alpha(0.3).restart();
+            }
+        });
+
+        // Initialize
+        loadData();
+    </script>
+
+    <div class="credit-footer">
+        Created by <a href="https://www.linkedin.com/in/aranyo/" target="_blank">Aranyo Ray</a>
+    </div>
+</body>
+</html>
