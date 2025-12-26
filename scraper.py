@@ -95,6 +95,9 @@ def fetch_project(project_id):
                 project['booth'] = next_text
             elif 'country' in label_text or 'location' in label_text:
                 project['country'] = next_text
+            elif 'student' in label_text or 'finalist' in label_text or 'author' in label_text:
+                if next_text and len(next_text) > 2 and len(next_text) < 100:
+                    project['student_name'] = next_text
 
         # Extract abstract
         abstract_section = None
