@@ -1,15 +1,13 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "winners-table.html",
-      "use": "@vercel/static"
-    }
-  ],
   "routes": [
     {
       "src": "/",
       "dest": "/winners-table.html"
+    },
+    {
+      "src": "/students",
+      "dest": "/students-table.html"
     },
     {
       "src": "/(.*)",
