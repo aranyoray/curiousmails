@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/winners-table.html"
+    },
+    {
+      "src": "/students",
+      "dest": "/students-table.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}

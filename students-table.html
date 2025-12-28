@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yale Students 2026-2030 | Contact Database</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f4d92 0%, #00356b 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f4d92 0%, #00356b 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #0f4d92;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0f4d92 0%, #00356b 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: #495057;
+            margin-left: auto;
+        }
+
+        .stats span {
+            font-weight: 600;
+            color: #0f4d92;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 70vh;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            background: #f8f9fa;
+            z-index: 10;
+        }
+
+        th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 700;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        th:hover {
+            background: #e9ecef;
+        }
+
+        th.sortable::after {
+            content: ' ⇅';
+            opacity: 0.3;
+        }
+
+        th.sorted-asc::after {
+            content: ' ↑';
+            opacity: 1;
+        }
+
+        th.sorted-desc::after {
+            content: ' ↓';
+            opacity: 1;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafbfc;
+        }
+
+        tbody tr:nth-child(even):hover {
+            background: #f1f3f5;
+        }
+
+        .email-link {
+            color: #0f4d92;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .email-link:hover {
+            text-decoration: underline;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #e7f5ff;
+            color: #1971c2;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 2px;
+        }
+
+        .badge-award {
+            background: #fff3bf;
+            color: #f59f00;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #868e96;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .copy-notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .copy-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+
+            .stats {
+                margin-left: 0;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Yale Students Database</h1>
+            <p>Yale University | Class of 2026-2030</p>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="searchInput" class="search-box" placeholder="Search by name, university, major, year...">
+            <button class="btn btn-primary" onclick="copyTableToClipboard()">
+                📋 Copy Table
+            </button>
+            <button class="btn btn-secondary" onclick="exportToCSV()">
+                💾 Export CSV
+            </button>
+            <div class="stats">
+                <div>Total: <span id="totalCount">0</span></div>
+                <div>Showing: <span id="visibleCount">0</span></div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="studentsTable">
+                <thead>
+                    <tr>
+                        <th class="sortable" onclick="sortTable(0)">Uni</th>
+                        <th class="sortable" onclick="sortTable(1)">Year</th>
+                        <th class="sortable" onclick="sortTable(2)">First</th>
+                        <th class="sortable" onclick="sortTable(3)">Last</th>
+                        <th class="sortable" onclick="sortTable(4)">Major</th>
+                        <th>Email</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="copy-notification" id="notification">
+        ✓ Table copied to clipboard!
+    </div>
+
+    <script>
+        let studentsData = [];
+        let currentSort = { column: -1, ascending: true };
+
+        // Load data from JSON file
+        async function loadData() {
+            try {
+                const response = await fetch('data/students.json');
+                const data = await response.json();
+
+                // Data is already an array with proper structure
+                studentsData = data.map(student => {
+                    return {
+                        uni: student.uni || 'Yale',
+                        year: student.year || '',
+                        first: student.first || '',
+                        last: student.last || '',
+                        major: student.major || 'Undeclared',
+                        email: student.email || '',
+                        notes: student.notes || ''
+                    };
+                });
+
+                renderTable(studentsData);
+                updateStats();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('tableBody').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <div>⚠️ Error loading data. Please ensure data/students.json exists.</div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <div>
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                </svg>
+                                <h3>No students found</h3>
+                                <p>Try adjusting your search filters</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = data.map(student => `
+                <tr>
+                    <td>${student.uni}</td>
+                    <td><span class="badge">${student.year}</span></td>
+                    <td>${student.first}</td>
+                    <td>${student.last}</td>
+                    <td>${student.major}</td>
+                    <td>${student.email ? `<a href="mailto:${student.email}" class="email-link">${student.email}</a>` : '-'}</td>
+                    <td>
+                        <small>${student.notes.substring(0, 100)}${student.notes.length > 100 ? '...' : ''}</small>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStats() {
+            const visible = studentsData.length;
+            document.getElementById('totalCount').textContent = studentsData.length;
+            document.getElementById('visibleCount').textContent = visible;
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+
+            if (!searchTerm) {
+                renderTable(studentsData);
+                updateStats();
+                return;
+            }
+
+            const filtered = studentsData.filter(student => {
+                return (
+                    student.first.toLowerCase().includes(searchTerm) ||
+                    student.last.toLowerCase().includes(searchTerm) ||
+                    student.uni.toLowerCase().includes(searchTerm) ||
+                    student.major.toLowerCase().includes(searchTerm) ||
+                    student.year.includes(searchTerm) ||
+                    student.email.toLowerCase().includes(searchTerm) ||
+                    student.notes.toLowerCase().includes(searchTerm)
+                );
+            });
+
+            renderTable(filtered);
+            document.getElementById('visibleCount').textContent = filtered.length;
+        });
+
+        // Sort table
+        function sortTable(columnIndex) {
+            const columns = ['uni', 'year', 'first', 'last', 'major'];
+            const column = columns[columnIndex];
+
+            if (currentSort.column === columnIndex) {
+                currentSort.ascending = !currentSort.ascending;
+            } else {
+                currentSort.column = columnIndex;
+                currentSort.ascending = true;
+            }
+
+            studentsData.sort((a, b) => {
+                const aVal = a[column].toLowerCase();
+                const bVal = b[column].toLowerCase();
+
+                if (aVal < bVal) return currentSort.ascending ? -1 : 1;
+                if (aVal > bVal) return currentSort.ascending ? 1 : -1;
+                return 0;
+            });
+
+            // Update header styling
+            document.querySelectorAll('th.sortable').forEach((th, i) => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+                if (i === columnIndex) {
+                    th.classList.add(currentSort.ascending ? 'sorted-asc' : 'sorted-desc');
+                }
+            });
+
+            renderTable(studentsData);
+        }
+
+        // Copy table to clipboard
+        async function copyTableToClipboard() {
+            const headers = 'Uni\tYear\tFirst\tLast\tMajor\tEmail\tNotes\n';
+            const rows = studentsData.map(s =>
+                `${s.uni}\t${s.year}\t${s.first}\t${s.last}\t${s.major}\t${s.email}\t${s.notes.replace(/\n/g, ' ').replace(/\t/g, ' ')}`
+            ).join('\n');
+
+            const tableText = headers + rows;
+
+            try {
+                await navigator.clipboard.writeText(tableText);
+                showNotification();
+            } catch (err) {
+                console.error('Failed to copy:', err);
+                // Fallback method
+                const textarea = document.createElement('textarea');
+                textarea.value = tableText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotification();
+            }
+        }
+
+        // Export to CSV
+        function exportToCSV() {
+            const headers = ['Uni', 'Year', 'First', 'Last', 'Major', 'Email', 'Notes'];
+            const csvContent = [
+                headers.join(','),
+                ...studentsData.map(s => [
+                    `"${s.uni}"`,
+                    s.year,
+                    `"${s.first}"`,
+                    `"${s.last}"`,
+                    `"${s.major}"`,
+                    s.email,
+                    `"${s.notes.replace(/"/g, '""')}"`
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `yale-students-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function showNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        // Load data on page load
+        loadData();
+    </script>
+</body>
+</html>
