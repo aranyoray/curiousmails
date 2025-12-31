@@ -192,7 +192,11 @@
     "awards": [
       "University of Arizona: Tuition Scholarship Award NASA: Second Award of $750"
     ],
-    "emails": [],
+    "emails": [
+      "catherinejian,dana.aitken@email.arizona.edu",
+      "catherinejian,danaaitken@arizona.edu",
+      "catherinejian,dana.aitken@arizona.edu"
+    ],
     "linkedin_profiles": [],
     "search_queries": [
       "\"Aitken, Catherine Jian, Dana\" email",
@@ -200,7 +204,8 @@
       "\"Aitken, Catherine Jian, Dana\" ISEF email"
     ],
     "category": "Microbiology",
-    "country": ""
+    "country": "",
+    "university": "University of Arizona"
   },
   "8919": {
     "student_name": "McDonough, Benjamin",
@@ -447,7 +452,11 @@
     "awards": [
       "University of Arizona: Tuition Scholarship Award"
     ],
-    "emails": [],
+    "emails": [
+      "kelsey.barber@email.arizona.edu",
+      "kelsey.barber@arizona.edu",
+      "kelseybarber@arizona.edu"
+    ],
     "linkedin_profiles": [],
     "search_queries": [
       "\"Barber, Kelsey\" email",
@@ -455,7 +464,8 @@
       "\"Barber, Kelsey\" ISEF email"
     ],
     "category": "Physics and Astronomy",
-    "country": ""
+    "country": "",
+    "university": "University of Arizona"
   },
   "8958": {
     "student_name": "Martheswaran, Tanisha",
@@ -481,7 +491,10 @@
     "awards": [
       "Drexel University: Full tuition scholarship $194,000"
     ],
-    "emails": [],
+    "emails": [
+      "gilbert.spencer@drexel.edu",
+      "gilbertspencer@drexel.edu"
+    ],
     "linkedin_profiles": [],
     "search_queries": [
       "\"Spencer, Gilbert\" email",
@@ -489,7 +502,8 @@
       "\"Spencer, Gilbert\" ISEF email"
     ],
     "category": "Earth and Environmental Sciences",
-    "country": ""
+    "country": "",
+    "university": "Drexel University"
   },
   "8965": {
     "student_name": "Sumathipala, Marissa",
