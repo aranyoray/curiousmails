@@ -18,7 +18,9 @@
     ],
     "category": "Chemistry",
     "country": "",
-    "university": "University of Arizona"
+    "university": "University of Arizona",
+    "skills": "Biology, Chemistry, Research, Web Development",
+    "major": "Chemistry"
   },
   "8895": {
     "student_name": "Catanzaro, Dominic",
@@ -35,7 +37,9 @@
       "\"Catanzaro, Dominic\" ISEF email"
     ],
     "category": "Physics and Astronomy",
-    "country": ""
+    "country": "",
+    "skills": "Engineering, Physics, Physics and Astronomy",
+    "major": "Physics and Astronomy"
   },
   "8891": {
     "student_name": "Tumma, Neehal",
@@ -52,7 +56,9 @@
       "\"Tumma, Neehal\" ISEF email"
     ],
     "category": "Microbiology",
-    "country": ""
+    "country": "",
+    "skills": "Biomedical, Microbiology",
+    "major": "Microbiology"
   },
   "8903": {
     "student_name": "Vetick, Brock",
@@ -69,7 +75,9 @@
       "\"Vetick, Brock\" ISEF email"
     ],
     "category": "Plant Sciences",
-    "country": ""
+    "country": "",
+    "skills": "Engineering, Plant Sciences, Research, Web Development",
+    "major": "Plant Sciences"
   },
   "8899": {
     "student_name": "Wu, Anton",
@@ -86,7 +94,9 @@
       "\"Wu, Anton\" ISEF email"
     ],
     "category": "Mathematics",
-    "country": ""
+    "country": "",
+    "skills": "Mathematics, Research, Web Development",
+    "major": "Mathematics"
   },
   "8908": {
     "student_name": "Martonfi, Caleb",
@@ -103,7 +113,9 @@
       "\"Martonfi, Caleb\" ISEF email"
     ],
     "category": "Behavioral and Social Sciences",
-    "country": ""
+    "country": "",
+    "skills": "Behavioral and Social Sciences, Biomedical",
+    "major": "Behavioral and Social Sciences"
   },
   "8914": {
     "student_name": "Zhu, Mary",
@@ -124,7 +136,9 @@
     ],
     "category": "Behavioral and Social Sciences",
     "country": "",
-    "university": "Arizona State University"
+    "university": "Arizona State University",
+    "skills": "Algorithm Design, Behavioral and Social Sciences, Environmental Science, Programming, Web Development",
+    "major": "Behavioral and Social Sciences"
   },
   "8907": {
     "student_name": "Anbu Bharathi , Siva Bharathi Ekambaram Thondaiman, Ramkumaar",
@@ -141,7 +155,9 @@
       "\"Anbu Bharathi , Siva Bharathi Ekambaram Thondaiman, Ramkumaar\" ISEF email"
     ],
     "category": "Plant Sciences",
-    "country": ""
+    "country": "",
+    "skills": "Environmental Science, Plant Sciences, Research",
+    "major": "Plant Sciences"
   },
   "8910": {
     "student_name": "Tremsin, Vasily",
@@ -162,7 +178,9 @@
     ],
     "category": "Embedded Systems",
     "country": "",
-    "university": "Arizona State University"
+    "university": "Arizona State University",
+    "skills": "Algorithm Design, Data Analysis, Embedded Systems, Engineering",
+    "major": "Embedded Systems"
   },
   "8911": {
     "student_name": "Parthasarathy, Nitya",
@@ -183,7 +201,9 @@
     ],
     "category": "Behavioral and Social Sciences",
     "country": "",
-    "university": "University of Arizona"
+    "university": "University of Arizona",
+    "skills": "AI, Behavioral and Social Sciences",
+    "major": "Behavioral and Social Sciences"
   },
   "8916": {
     "student_name": "Aitken, Catherine Jian, Dana",
@@ -205,7 +225,9 @@
     ],
     "category": "Microbiology",
     "country": "",
-    "university": "University of Arizona"
+    "university": "University of Arizona",
+    "skills": "Microbiology, Research",
+    "major": "Microbiology"
   },
   "8919": {
     "student_name": "McDonough, Benjamin",
@@ -222,7 +244,9 @@
       "\"McDonough, Benjamin\" ISEF email"
     ],
     "category": "Systems Software",
-    "country": ""
+    "country": "",
+    "skills": "AI, Engineering, Programming, Research, Systems Software",
+    "major": "Systems Software"
   },
   "8922": {
     "student_name": "Jackson, Holly",
@@ -239,7 +263,9 @@
       "\"Jackson, Holly\" ISEF email"
     ],
     "category": "Robotics and Intelligent Machines",
-    "country": ""
+    "country": "",
+    "skills": "Algorithm Design, Research, Robotics and Intelligent Machines",
+    "major": "Robotics and Intelligent Machines"
   },
   "8921": {
     "student_name": "Zlokapa, Alexander",
@@ -256,7 +282,9 @@
       "\"Zlokapa, Alexander\" ISEF email"
     ],
     "category": "Systems Software",
-    "country": ""
+    "country": "",
+    "skills": "Biomedical, Machine Learning, Systems Software, Web Development",
+    "major": "Systems Software"
   },
   "8926": {
     "student_name": "Mayhew, Lucas",
@@ -273,7 +301,9 @@
       "\"Mayhew, Lucas\" ISEF email"
     ],
     "category": "Engineering Mechanics",
-    "country": ""
+    "country": "",
+    "skills": "Engineering, Engineering Mechanics, Research",
+    "major": "Engineering Mechanics"
   },
   "8935": {
     "student_name": "da Silva Borges, Luiz",
@@ -290,7 +320,9 @@
       "\"da Silva Borges, Luiz\" ISEF email"
     ],
     "category": "Biomedical Engineering",
-    "country": ""
+    "country": "",
+    "skills": "AI, Biomedical Engineering",
+    "major": "Biomedical Engineering"
   },
   "8934": {
     "student_name": "Wagner, Clara",
@@ -307,7 +339,9 @@
       "\"Wagner, Clara\" ISEF email"
     ],
     "category": "Biomedical Engineering",
-    "country": ""
+    "country": "",
+    "skills": "Biomedical Engineering, Engineering, Research",
+    "major": "Biomedical Engineering"
   },
   "8937": {
     "student_name": "de Melo Ramalho, Marcelo  da Costa Dantas, Beatriz",
@@ -324,7 +358,9 @@
       "\"de Melo Ramalho, Marcelo  da Costa Dantas, Beatriz\" ISEF email"
     ],
     "category": "Materials Science",
-    "country": ""
+    "country": "",
+    "skills": "Materials Science",
+    "major": "Materials Science"
   },
   "8949": {
     "student_name": "Khurana, Neil",
@@ -341,7 +377,9 @@
       "\"Khurana, Neil\" ISEF email"
     ],
     "category": "Biomedical and Health Sciences",
-    "country": ""
+    "country": "",
+    "skills": "Biomedical, Biomedical and Health Sciences, Programming, Research, Web Development",
+    "major": "Biomedical and Health Sciences"
   },
   "8946": {
     "student_name": "Kopparapu, Kavya Kopparapu, Neeyanth Zhang, Justin",
@@ -358,7 +396,9 @@
       "\"Kopparapu, Kavya Kopparapu, Neeyanth Zhang, Justin\" ISEF email"
     ],
     "category": "Translational Medical Science",
-    "country": ""
+    "country": "",
+    "skills": "AI, Machine Learning, Research, Translational Medical Science",
+    "major": "Translational Medical Science"
   },
   "8950": {
     "student_name": "Jin, Amy",
@@ -375,7 +415,9 @@
       "\"Jin, Amy\" ISEF email"
     ],
     "category": "Robotics and Intelligent Machines",
-    "country": ""
+    "country": "",
+    "skills": "Machine Learning, Robotics and Intelligent Machines",
+    "major": "Robotics and Intelligent Machines"
   },
   "8959": {
     "student_name": "Lai, Michael",
@@ -392,7 +434,9 @@
       "\"Lai, Michael\" ISEF email"
     ],
     "category": "Cellular and Molecular Biology",
-    "country": ""
+    "country": "",
+    "skills": "Cellular and Molecular Biology",
+    "major": "Cellular and Molecular Biology"
   },
   "8952": {
     "student_name": "Hase-Liu, Matthew",
@@ -409,7 +453,9 @@
       "\"Hase-Liu, Matthew\" ISEF email"
     ],
     "category": "Mathematics",
-    "country": ""
+    "country": "",
+    "skills": "Algorithm Design, Engineering, Mathematics, Research, Web Development",
+    "major": "Mathematics"
   },
   "8956": {
     "student_name": "Tacescu, Robert",
@@ -426,7 +472,9 @@
       "\"Tacescu, Robert\" ISEF email"
     ],
     "category": "Robotics and Intelligent Machines",
-    "country": ""
+    "country": "",
+    "skills": "Engineering, Research, Robotics and Intelligent Machines",
+    "major": "Robotics and Intelligent Machines"
   },
   "8957": {
     "student_name": "Abdalhadi, Taymaa",
@@ -443,7 +491,9 @@
       "\"Abdalhadi, Taymaa\" ISEF email"
     ],
     "category": "Systems Software",
-    "country": ""
+    "country": "",
+    "skills": "Engineering, Research, Systems Software, Web Development",
+    "major": "Systems Software"
   },
   "8951": {
     "student_name": "Barber, Kelsey",
@@ -465,7 +515,9 @@
     ],
     "category": "Physics and Astronomy",
     "country": "",
-    "university": "University of Arizona"
+    "university": "University of Arizona",
+    "skills": "Engineering, Physics and Astronomy, Research, Web Development",
+    "major": "Physics and Astronomy"
   },
   "8958": {
     "student_name": "Martheswaran, Tanisha",
@@ -482,7 +534,9 @@
       "\"Martheswaran, Tanisha\" ISEF email"
     ],
     "category": "Environmental Engineering",
-    "country": ""
+    "country": "",
+    "skills": "Biomedical, Chemistry, Engineering, Environmental Engineering, Research",
+    "major": "Environmental Engineering"
   },
   "8962": {
     "student_name": "Spencer, Gilbert",
@@ -503,7 +557,9 @@
     ],
     "category": "Earth and Environmental Sciences",
     "country": "",
-    "university": "Drexel University"
+    "university": "Drexel University",
+    "skills": "Earth and Environmental Sciences, Environmental Science, Web Development",
+    "major": "Earth and Environmental Sciences"
   },
   "8965": {
     "student_name": "Sumathipala, Marissa",
@@ -520,7 +576,9 @@
       "\"Sumathipala, Marissa\" ISEF email"
     ],
     "category": "Cellular and Molecular Biology",
-    "country": ""
+    "country": "",
+    "skills": "Biochemistry, Biology, Biomedical, Cellular and Molecular Biology, Engineering",
+    "major": "Cellular and Molecular Biology"
   },
   "8963": {
     "student_name": "Huo, Marc",
@@ -537,6 +595,8 @@
       "\"Huo, Marc\" ISEF email"
     ],
     "category": "Cellular and Molecular Biology",
-    "country": ""
+    "country": "",
+    "skills": "Biochemistry, Biology, Cellular and Molecular Biology, Engineering, Research",
+    "major": "Cellular and Molecular Biology"
   }
 }

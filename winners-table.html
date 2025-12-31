@@ -297,6 +297,7 @@
                         <th class="sortable" onclick="sortTable(3)">Last</th>
                         <th class="sortable" onclick="sortTable(4)">Major</th>
                         <th>Email</th>
+                        <th>Skills</th>
                         <th>Notes</th>
                     </tr>
                 </thead>
@@ -337,6 +338,7 @@
                         last: lastName,
                         major,
                         email: (winner.emails && winner.emails.length > 0) ? winner.emails[0] : '',
+                        skills: winner.skills || '',
                         notes: winner.awards ? winner.awards.join('; ') : '',
                         linkedin: winner.linkedin_profiles || [],
                         projectTitle: winner.project_title || ''
@@ -349,7 +351,7 @@
                 console.error('Error loading data:', error);
                 document.getElementById('tableBody').innerHTML = `
                     <tr>
-                        <td colspan="7" class="empty-state">
+                        <td colspan="8" class="empty-state">
                             <div>⚠️ Error loading data. Please ensure data/winner_emails.json exists.</div>
                         </td>
                     </tr>
@@ -385,7 +387,7 @@
             if (data.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="empty-state">
+                        <td colspan="8" class="empty-state">
                             <div>
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
