@@ -6,7 +6,10 @@
     "awards": [
       "University of Arizona: Tuition Scholarship Award"
     ],
-    "emails": [],
+    "emails": [
+      "jakebringetto@arizona.edu",
+      "jake.bringetto@email.arizona.edu"
+    ],
     "linkedin_profiles": [],
     "search_queries": [
       "\"Bringetto, Jake\" email",
@@ -14,7 +17,8 @@
       "\"Bringetto, Jake\" ISEF email"
     ],
     "category": "Chemistry",
-    "country": ""
+    "country": "",
+    "university": "University of Arizona"
   },
   "8895": {
     "student_name": "Catanzaro, Dominic",
@@ -108,7 +112,10 @@
     "awards": [
       "Arizona State University: Arizona State University Intel ISEF Scholarship"
     ],
-    "emails": [],
+    "emails": [
+      "mary.zhu@asu.edu",
+      "maryzhu@asu.edu"
+    ],
     "linkedin_profiles": [],
     "search_queries": [
       "\"Zhu, Mary\" email",
@@ -116,7 +123,8 @@
       "\"Zhu, Mary\" ISEF email"
     ],
     "category": "Behavioral and Social Sciences",
-    "country": ""
+    "country": "",
+    "university": "Arizona State University"
   },
   "8907": {
     "student_name": "Anbu Bharathi , Siva Bharathi Ekambaram Thondaiman, Ramkumaar",
@@ -142,7 +150,10 @@
     "awards": [
       "Arizona State University: Arizona State University Intel ISEF Scholarship"
     ],
-    "emails": [],
+    "emails": [
+      "vasilytremsin@asu.edu",
+      "vasily.tremsin@asu.edu"
+    ],
     "linkedin_profiles": [],
     "search_queries": [
       "\"Tremsin, Vasily\" email",
@@ -150,7 +161,8 @@
       "\"Tremsin, Vasily\" ISEF email"
     ],
     "category": "Embedded Systems",
-    "country": ""
+    "country": "",
+    "university": "Arizona State University"
   },
   "8911": {
     "student_name": "Parthasarathy, Nitya",
@@ -159,7 +171,10 @@
     "awards": [
       "Fourth Award of $500 American Statistical Association: Certificate of Honorable Mention University of Arizona: Tuition Scholarship Award"
     ],
-    "emails": [],
+    "emails": [
+      "nitya.parthasarathy@email.arizona.edu",
+      "nityaparthasarathy@arizona.edu"
+    ],
     "linkedin_profiles": [],
     "search_queries": [
       "\"Parthasarathy, Nitya\" email",
@@ -167,7 +182,8 @@
       "\"Parthasarathy, Nitya\" ISEF email"
     ],
     "category": "Behavioral and Social Sciences",
-    "country": ""
+    "country": "",
+    "university": "University of Arizona"
   },
   "8916": {
     "student_name": "Aitken, Catherine Jian, Dana",
